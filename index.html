@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1300" />
+    <title>∏ano</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta
+      name="description"
+      content="∏ano stream"
+    />
+    <meta name="theme-color" content="#000000" />
+    <script src="/piano/icecast-metadata-player-1.17.12.main.min.js"></script>
+    <script src="/piano/icecast-metadata-stats-0.1.12.min.js"></script>
+    <style>
+		html,
+		body {
+			width:100%;
+			#text-size-adjust: none;
+			background-color:black;
+			color:rgb(254, 254, 254);
+			font-family: "DejaVu Sans Mono", monospace;
+			font-size: 135%;
+		}
+		header {
+			margin: 0 10%;
+			}
+		hr {
+			border-top: 1px solid white;
+		}
+		h1 {
+		  font-size:5em;
+		  margin:auto;
+		  font-weight:bold;
+		  #text-indent:-18px;
+		  line-height:1em;
+		  color:white;  
+		}
+		#moto 	{
+                        cursor:default;
+		  	font-size:1em;
+		  	font-weight:bold;
+		    	padding: 0px 0 0 8px;
+		  	}
+		   
+		#metadata, #metadata a  {
+		  font-size:.8em;
+		  background-color:black;
+		  color:rgb(254, 254, 254);
+		  padding:4px 0 0 8px;
+		  line-height:2em;
+		  text-decoration:none;
+		  text-transform: capitalize; 
+		 }
+
+		#metadata a {
+		  cursor:help;
+		}
+
+		#metadata a:hover img {
+		  background-color:rgb(254,254,254);
+		  color:black;
+		  height:1em;
+		  text-decoration:underline;
+		  cursor: help;		  
+		}
+		
+		a[data-title]:hover::after {
+        		content: attr(data-title);
+        		z-index: 100;
+        		background-color: rvb(204,204,204);
+			color:black;
+		      }
+
+		img {
+		  -webkit-filter: invert(100%); /* safari 6.0 - 9.0 */
+          		filter: invert(100%);
+		height:20px;
+		}
+		
+		#playbutton {
+		  font-size: 1em;
+		  line-height:1em;
+		  background: transparent no-repeat !important;
+		  color:rgb(204, 204, 204) !important;
+                  width: .8em;
+		  border:none;
+		  line-height:.5em
+                  border: none !important;
+                  cursor: pointer;
+                  outline: none !important;
+		}
+
+		#pausebutton {
+		  font-size:1em;
+		  line-height:1em;
+		  height: .8em;
+  		  width: .8em;
+		  background:transparent no-repeat !important;
+                  color:rgb(204, 204, 204) !important;
+ 		  width: 0.8em;
+		  border: none;
+		  line-height:0.5em;
+		  border: none !important;
+    		  cursor: pointer;
+    		  outline: none !important;
+		}
+		  
+		.play-pause-button {
+			background-color: #000 !important;
+			padding: 0px 5px 1px 5px;
+			user-select: none;
+		}
+
+		.metadata {
+			padding-left: 10px;
+			text-align: left;
+			display:none;
+		}
+
+		.btn {
+ 			border: none;
+  			color:black;
+			background-color: rgb(254,254,254,.5);
+  			padding: 2px 2px;
+			align-items:flex-end;
+  			display: inline-flex;
+		}
+
+		.btn:hover {
+			cursor:default;
+//			background-color: rgb(254,254,254,.45)
+		}
+
+		.left {
+			display:inline-flex;
+			justify-content:center;	
+			align-items:flex-start;
+		}
+		.host,.host a {
+			font-decoration:none;
+			position:fixed;
+			bottom:5px;
+			right:5px;
+			font-size: .666em;
+			width:10em;
+			color: white;
+			font-weight: normal;
+			margin-right: 5px;
+		}
+		.host a:hover {
+			background-color:white;
+			color:black;
+		}
+
+		#playbutton{
+			display:flex-inline;
+		}
+		#pausebutton{
+			display:none
+		}
+		fieldset {color: black}
+
+		.piano-key {
+			 -webkit-box-flex:1;
+			 -ms-flex:1;
+			 flex:1;
+			 margin:0 .1rem;
+			 max-width:8.8rem;
+			 position:relative
+		}
+		.piano-keys {
+			  display: flex;
+			  list-style: none;
+			  margin: 0;
+			  padding: 0;
+			  justify-content: center;
+		}
+		.piano-keys .key {
+				#cursor: pointer;
+				user-select: none;
+				position: relative;
+				text-transform: uppercase;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				writing-mode: vertical-rl;
+				text-orientation: upright;
+				justify-content: center;
+		}
+		
+		.piano-keys .white {
+				font-size:.6em;
+				color:black;
+				
+		}	
+		
+		.piano-keys .black {
+				font-size:.5em;
+				color:white;
+		}		
+		.piano-keys .black {
+			  z-index: 2;
+			  width: 15px;
+			  height: 60px;
+			  margin: 0 -7px 0 -7px;
+                          border-left: 1px black solid;                                       
+                          border-right: 1 px black solid;                                       
+                          border-bottom: 1 px black solid;                                       
+			  border-top: 1px white solid;
+			  border-radius: 0 0 3px 3px;
+			  background: linear-gradient(#fff, #eee);
+		}
+		.piano-keys .black.active {
+			  box-shadow: inset -5px -10px 10px rgba(255,255,255,0.1);
+			  background:linear-gradient(to bottom, #000, #434343);
+			  font-size:0.3em;
+			  border-top:1px white solid;
+		}
+		.piano-keys .white {
+			  height: 100px;
+			  width: 30px;
+			  border-radius: 0 0 8px 8px;
+			  border: 1px solid #FFF;
+			  background: linear-gradient(#000 96%, #111 4%);
+		}
+		.piano-keys .white.active {
+			  box-shadow: inset -5px 5px 20px rgba(0,0,0,0.2);
+			  background:linear-gradient(to bottom, #ccc 0%, #fff 100%);
+			  font-size:0.3em;
+		}
+		.piano-keys .key span {
+			  position: absolute;
+			  bottom: 20px;
+			  width: 100%;
+			  color: #A2A2A2;
+			  font-size: 1.13rem;
+			  text-align: center;
+		}
+		.piano-keys .key.hide span {
+				display: none;
+		}
+		.piano-keys .black span {
+			  bottom: 13px;
+			  color: #888888;
+		}
+
+		#button, #playingnow {
+			align-items: center;
+			display:inline-flex;
+		}
+
+		#button {
+			padding: 0 15px 0 6px;
+			}		
+		#playingnow {
+			font-size: .8em;
+		}
+
+		.column {
+			width: 100%;
+			min-height: 1em;
+			display:flex;
+			margin: 0px auto 0px auto;
+		}
+
+		#streaminfo {
+			font-size:.5em;
+			line-height:1.0em;
+			color:rvb(204,204,204);
+			margin: 8px 0 0 0;
+			padding: 0;
+			justify-content:center;
+			align-items:center;
+			display:flex;
+		}
+		
+		#streaminfoR  {
+			text-align: right;
+                        font-size:.5em;
+                        color:rvb(204,204,204);
+                        line-height: 1.0em;
+                        margin: 6px 0 6px auto;
+                        padding: 0;
+                        justify-content:center;
+                        align-self:flex-end;
+                }
+
+/*
+		.collapsible {
+  			background-color: #000;
+			color:#CCC;
+  			cursor: pointer;
+  			border: none;
+  			text-align: left;
+  			outline: none;
+  			font-size: 1em;
+		}
+
+		.active, .collapsible:hover {
+  			color: #FFF;
+		}	
+
+		.collapsible:after {
+  			content: '\002B';
+  			color: #CCC;
+  			float: right;
+  			margin-left: 5px;
+		}
+
+		.content {
+			max-height: 0;
+			overflow: hidden;
+	  		transition: max-height 0.1s ease-out;
+		}
+*/
+		.badge {
+  			display: inline-block;
+  			padding: 2px 6px;
+  			font-size: 5px;
+  			font-weight: bold;
+  			color: #000;
+  			background-color: #fff;
+  			border-radius: 2px;
+		}
+		.star {
+			font-size: 2em;
+		}
+    </style>
+    
+  </head>
+  <body>
+    <header>
+		<h1 style="margin-bottom: 0px">
+			∏ano
+		</h1>
+			<p id="moto" onclick="swap()">
+			An endless hi-resolution stream of piano.
+
+			</p>
+
+		<hr />	
+
+			<div class="column">
+
+				<div id="playingnow">
+				  <span id="metadata"></span>
+				</div>
+
+			</div>
+
+		<hr />
+      
+			<div name="audio-controls" class="column">
+
+                                <div id="button">
+                                        <button id="playbutton"  class="play-pause-button" onclick="player.play();">▶</button>
+                                        <button id="pausebutton" class="play-pause-button" onclick="player.stop();">⏸</button>
+                                </div>
+                                &nbsp; <div id="streaminfo">press play</div>
+				<div id="streaminfoR"></div>
+                        </div>
+		<hr/>
+	<!--button class="collapsible"></button-->
+	<ul class="content piano-keys">
+		<li class="key white" data-key="B0"></li>
+		<li class="key white" data-key="C1"></li>
+		<li class="key black" data-key="C#1"></li>
+		<li class="key white" data-key="D1"></li>
+		<li class="key black" data-key="D#1"></li>
+		<li class="key white" data-key="E1"></li>
+		<li class="key white" data-key="F1"></li>
+		<li class="key black" data-key="F#1"></li>
+		<li class="key white" data-key="G1"></li>
+		<li class="key black" data-key="G#1"></li>
+		<li class="key white" data-key="A1"></li>
+		<li class="key black" data-key="A#1"></li>
+		<li class="key white" data-key="B1"></li>
+		<li class="key white" data-key="C2"></li>
+		<li class="key black" data-key="C#2"></li>
+		<li class="key white" data-key="D2"></li>
+		<li class="key black" data-key="D#2"></li>
+		<li class="key white" data-key="E2"></li>
+		<li class="key white" data-key="F2"></li>
+		<li class="key black" data-key="F#2"></li>
+		<li class="key white" data-key="G2"></li>
+		<li class="key black" data-key="G#2"></li>
+		<li class="key white" data-key="A2"></li>
+		<li class="key black" data-key="A#2"></li>
+		<li class="key white" data-key="B2"></li>
+		<li class="key white" data-key="C3"></li>
+		<li class="key black" data-key="C#3"></li>
+		<li class="key white" data-key="D3"></li>
+		<li class="key black" data-key="D#3"></li>
+		<li class="key white" data-key="E3"></li>
+		<li class="key white" data-key="F3"></li>
+		<li class="key black" data-key="F#3"></li>
+		<li class="key white" data-key="G3"></li>
+		<li class="key black" data-key="G#3"></li>
+		<li class="key white" data-key="A3"></li>
+		<li class="key black" data-key="A#3"></li>
+		<li class="key white" data-key="B3"></li>
+		<li class="key white" data-key="C4"></li>
+		<li class="key black" data-key="C#4"></li>
+		<li class="key white" data-key="D4"></li>
+		<li class="key black" data-key="D#4"></li>
+		<li class="key white" data-key="E4"></li>
+		<li class="key white" data-key="F4"></li>
+		<li class="key black" data-key="F#4"></li>
+		<li class="key white" data-key="G4"></li>
+		<li class="key black" data-key="G#4"></li>
+		<li class="key white" data-key="A4"></li>
+		<li class="key black" data-key="A#4"></li>
+		<li class="key white" data-key="B4"></li>
+		<li class="key white" data-key="C5"></li>
+		<li class="key black" data-key="C#5"></li>
+		<li class="key white" data-key="D5"></li>
+		<li class="key black" data-key="D#5"></li>
+		<li class="key white" data-key="E5"></li>
+		<li class="key white" data-key="F5"></li>
+		<li class="key black" data-key="F#5"></li>
+		<li class="key white" data-key="G5"></li>
+		<li class="key black" data-key="G#5"></li>
+		<li class="key white" data-key="A5"></li>
+		<li class="key black" data-key="A#5"></li>
+		<li class="key white" data-key="B5"></li>
+		<li class="key white" data-key="C6"></li>
+		<li class="key black" data-key="C#6"></li>
+		<li class="key white" data-key="D6"></li>
+		<li class="key black" data-key="D#6"></li>
+		<li class="key white" data-key="E6"></li>
+		<li class="key white" data-key="F6"></li>
+		<li class="key black" data-key="F#6"></li>
+		<li class="key white" data-key="G6"></li>
+		<li class="key black" data-key="G#6"></li>
+		<li class="key white" data-key="A6"></li>
+		<li class="key black" data-key="A#6"></li>
+		<li class="key white" data-key="B6"></li>
+	</ul>
+	</header>  
+	
+	<div class="host">
+		<a href="https://p-node.org/">hosted by Π-node</a>
+	</div>
+  	<script>
+		var buflen = 2048;
+		var buf = new Float32Array( buflen );
+		var keypressed = document.querySelector('[data-key="C2"]');
+		const myPiano = new Audio();
+		const e = new (window.AudioContext || window.webkitAudioContext)();
+		var source,analyser,gainNode;
+		
+		const statsListener = new IcecastMetadataStats("https://stream.p-node.org/piano", {
+			sources:"ogg",
+			interval:60,
+			onStats: (metadata) => 
+			{ 
+				console.log(metadata);
+				var artist,title,album, playingnow = "";
+
+				if (typeof metadata.ogg.ARTIST !== 'undefined')  
+					artist = metadata.ogg.ARTIST;
+				if (typeof metadata.ogg.TITLE !== 'undefined')  
+					title =  metadata.ogg.TITLE;
+				document.title = artist + " – " + title + " | ∏ano";
+				if (typeof metadata.ogg.ALBUM !== 'undefined')  
+					album = metadata.ogg.ALBUM ;
+				playingnow = artist + " – " + title + " (" + album + ") " ;
+                        	if (typeof metadata.ogg.COMPOSER !== 'undefined' && metadata.ogg.COMPOSER !== "" && metadata.ogg.COMPOSER !== metadata.ogg.ARTIST)
+                                	playingnow += "| composed by " + metadata.ogg.COMPOSER + "&nbsp;";			
+				if (typeof metadata.ogg.GENRE !== 'undefined')  
+					playingnow += "| <i>" + metadata.ogg.GENRE + "</i>";
+				if (typeof metadata.ogg.DATE !== 'undefined')  
+					playingnow += " | " + metadata.ogg.DATE + "";
+				playingnow += '&nbsp;<a href="https://www.discogs.com/search/?q=' + artist.replace(/[ &,:]/g,'+') + '+' + album.replace(/[ &,:]/g,'+') 
+					+ '" title="information about this track on discogs" target="_">'
+					+ '<span class="star">✱</span></a>';
+				document.getElementById("metadata").innerHTML = playingnow;
+				swap();
+			}
+		});
+		
+		document.addEventListener("DOMContentLoaded",function() { statsListener.start();});
+
+		var noteStrings = [     "B0","C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1",
+                                                "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
+                                                "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+                                                "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+                                                "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+                                                "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6"
+                                        ];
+	        var noteEvents = [];
+
+
+		const onMetadata = (metadata) => {
+			statsListener.stop();
+			console.log(metadata);
+			var artist,title,album, playingnow = "";
+	
+			if (typeof metadata.ARTIST !== 'undefined')  
+				artist = metadata.ARTIST;
+			if (typeof metadata.TITLE !== 'undefined')  
+				title =  metadata.TITLE;
+			document.title = artist + " – " + title + " | ∏ano";
+			if (typeof metadata.ALBUM !== 'undefined')  
+				album = metadata.ALBUM ;
+			playingnow = artist + " – " + title + " (" + album + ") " ;
+                        if (typeof metadata.COMPOSER !== 'undefined' && metadata.COMPOSER !== "" && metadata.COMPOSER !== metadata.ARTIST)
+                                playingnow += "| composed by " + metadata.COMPOSER + "&nbsp;";			
+			if (typeof metadata.GENRE !== 'undefined')  
+				playingnow += "| <i>" + metadata.GENRE + "</i>";
+			if (typeof metadata.DATE !== 'undefined')  
+				playingnow += " | " + metadata.DATE + "";
+			playingnow += '&nbsp;<a href="https://www.discogs.com/search/?q=' + artist.replace(/[ &,:]/g,'+') + '+' + album.replace(/[ &,:]/g,'+') 
+					+ '" title="information about this track on discogs" target="_">'
+					+ '<span class="star">✱</span></a>';
+			document.getElementById("metadata").innerHTML = playingnow;
+			swap();
+			//console.log(player.metadataQueue);
+		};
+		
+		const onLoad = () => {
+				document.getElementById("streaminfo").innerHTML = player.state ;
+			}
+		
+		const onPlay = () => {
+				player.audioElement.volume = 1;
+				document.getElementById("pausebutton").style.display = "inline-block";
+				document.getElementById("playbutton").style.display = "none";
+
+                                        // init gain
+                                gainNode = e.createGain();
+                                gainNode.gain.value = 1.0;
+                                gainNode.connect( e.destination);
+                                        //init source
+                                // source = e.createMediaElementSource(myPiano);
+                                source = e.createMediaElementSource(player.audioElement)
+
+                                        // init analyser
+                                analyser = e.createAnalyser();
+                                analyser.fftSize = 2048;
+
+                                        // connect everything
+                                source.connect( analyser );
+                                source.connect( gainNode );
+
+				updatePitch();
+			}
+			  
+		const onStop = () => {
+				document.getElementById("pausebutton").style.display = "none";
+				document.getElementById("streaminfoR").innerHTML = "";
+				document.getElementById("playbutton").style.display = "inline-block";
+				//document.getElementById("metadata").innerHTML = "";
+				document.getElementById("streaminfo").innerHTML = player.state 
+                                keypressed.classList.remove("active");
+				statsListener.start();
+			  }
+			  
+		const onStreamEnd = () => {
+				document.getElementById("playbutton").click();
+				document.getElementById("streaminfo").innerHTML = player.state ;
+			}
+
+		const onRetry = () => {
+			document.getElementById("streaminfo").innerHTML = player.state ;
+			}
+			
+		const onError = (message,error) => {
+                        document.getElementById("streaminfo").innerHTML = message ;
+                        }
+
+
+		const onCodecUpdate = (codecInformation, updateTimestamp) => {
+			//console.log(updateTimestamp);
+			var sec_num= updateTimestamp;
+			var hours = Math.floor((sec_num % 86400) / 1440 ).toLocaleString('en-US', {minimumIntegerDigits: 2,useGrouping: false});
+			var minutes = Math.floor((sec_num % 3600) / 60).toLocaleString('en-US', {minimumIntegerDigits: 2,useGrouping: false}); 
+			var seconds = Math.floor(sec_num % 60).toLocaleString('en-US', {minimumIntegerDigits: 2,useGrouping: false});
+			var bitrate = codecInformation.bitrate;
+			document.getElementById("streaminfo").innerHTML =  '<span class=left">'+ player.state + '</span> &nbsp;<span class="left">'
+				+ hours +':'+ minutes +':'+ seconds +'</span>';
+			document.getElementById("streaminfoR").innerHTML = '<span class="btn">stereo</span> &nbsp; <span class="btn">bitrate:'
+			//	+ codecInformation.channelMode +'</span>&nbsp;<span class="btn">bitrate:'
+				+ bitrate +'kHz</span>';	// String(bitrate).padStart(4,'0')
+			}
+	
+		const player = 
+			new IcecastMetadataPlayer(
+			  "https://stream.p-node.org/piano",{
+				  audioElement: myPiano,
+				  enableLogging:true,
+				  metadataTypes:["ogg"],
+				  playbackMethod:"mediasource",
+				  onMetadata,
+				  onLoad,
+				  onPlay,
+				  onStop,
+				  onRetry,
+				  onCodecUpdate,
+				  bufferLength:2,
+				  retryTimeout: 300,
+				  retryDelayRate: 0.1,
+				  retryDelayMin: 0.5,
+				  retryDelayMax: 5			  
+		});
+
+		function swap() {
+			var quotes = [
+			  "A feedback stream of piano.",
+			  "A stream with piano feedback.",
+			  "A mood radio for piano.",
+			  "A piano radio for the mood",
+			  "A noise radio for piano.",
+			  "A random stream of piano.",
+                          "A critical stream of piano.",
+			  "A stream of critical piano.",
+                          "A boring hi-resolution  stream of piano.",
+                          "A noisy stream of piano.",
+                          "An experimental stream of piano.",
+                          "An endless hi-resolution stream of piano",
+                          "A collection of experimental piano.",
+                          "A piano stream for piano nerds.",
+                          "A mad stream of endless piano.",
+                          "An ode to the most colonial instrument." ,
+                          "A piano stream with not only piano.",
+                          "An ambient stream of piano.",
+                          "An exotic stream of piano.",
+                          "An improvised stream of piano.",
+                          "An electronic stream of piano.",
+			  "A collection of experimental piano",
+                          "An experimental collection of piano.",
+                          "A research project about piano.",
+			  "1000 years of piano.",
+                          "An infinite experience of piano.",
+                          "A depressing stream of piano.",
+			  "A different piano experience.",
+                          "An historical archive of piano.",
+                          "A mad scientist collection of piano.",
+			  "An endless love for piano.",
+                          "An endless hate for piano.",
+			  "A piano stream not for pianist.",
+			  "A piano radio for the mood.",
+			  "A divergent experience with piano.",
+			  "Piano, piano and more piano.",
+			  "Piano or piano?",
+			  "An experimental stream of endless piano.",
+			  "An endless stream of experimental piano.",
+			  "A stream for fluxus piano.",
+			  "An endless stream of ambient piano.",
+			  "An incredible playlist of incredible piano pieces.",
+			  "No piano, no peace.",
+			  "All pianist are bastards.",
+			  "All pianos are beautiful.",
+			  "Streaming killed the piano star."
+                        ];
+		
+                        document.getElementById("moto").innerHTML = quotes[ Math.floor( Math.random() * quotes.length ) ];
+
+		}
+        
+		//console.log("gain:"+ gainNode.gain.value +"/ volume:"+ player.audioElement.volume);
+			
+			var coll = document.getElementsByClassName("collapsible");
+			var i;
+			for (i = 0; i < coll.length; i++) {
+  				coll[i].addEventListener("click", function() {
+    				this.classList.toggle("active");
+    				var content = this.nextElementSibling;
+    				if (content.style.maxHeight){
+      					content.style.maxHeight = null;
+   				}
+ 				else {
+      					content.style.maxHeight = content.scrollHeight + "px";
+    				} 
+  			});
+		}	
+
+
+	function noteFromPitch( frequency ) {
+		var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
+		return Math.round( noteNum ) + 47;
+	}  
+	
+	function autoCorrelate( buf, sampleRate ) {
+		// Implements the ACF2+ algorithm
+		var SIZE = buf.length;
+		var rms = 0;
+
+		for (var i=0;i<SIZE;i++) {
+			var val = buf[i];
+			rms += val*val;
+		}
+		rms = Math.sqrt(rms/SIZE);
+		if (rms<0.01) // not enough signal
+			return -1;
+
+		var r1=0, r2=SIZE-1, thres=0.2;
+		for (var i=0; i<SIZE/2; i++)
+			if (Math.abs(buf[i])<thres) { r1=i; break; }
+		for (var i=1; i<SIZE/2; i++)
+			if (Math.abs(buf[SIZE-i])<thres) { r2=SIZE-i; break; }
+
+		buf = buf.slice(r1,r2);
+		SIZE = buf.length;
+
+		var c = new Array(SIZE).fill(0);
+		for (var i=0; i<SIZE; i++)
+			for (var j=0; j<SIZE-i; j++)
+				c[i] = c[i] + buf[j]*buf[j+i];
+
+		var d=0; while (c[d]>c[d+1]) d++;
+		var maxval=-1, maxpos=-1;
+		for (var i=d; i<SIZE; i++) {
+			if (c[i] > maxval) {
+				maxval = c[i];
+				maxpos = i;
+			}
+		}
+		var T0 = maxpos;
+
+		var x1=c[T0-1], x2=c[T0], x3=c[T0+1];
+		a = (x1 + x3 - 2*x2)/2;
+		b = (x3 - x1)/2;
+		if (a) T0 = T0 - b/(2*a);
+
+		return sampleRate/T0;
+	}
+	
+	function updatePitch( time ) {
+                analyser.getFloatTimeDomainData( buf );
+		var ac = autoCorrelate( buf, e.sampleRate );
+
+		if (ac == -1) {} 
+		else {
+			// duration of note
+			// var t0 = performance.now();
+			// convert Hz to note
+			if (ac >= 30) pitch = ac;
+			else pitch = 30;
+			var noteEval =  noteFromPitch( pitch );
+			var note = noteStrings[noteEval%72];
+			var key = document.querySelector('[data-key="'+note+'"]');
+			key.innerHTML = note;
+
+//		console.log(">"+pitch+" Hz > "+note);
+			
+			// press piano key
+			key.classList.add("active");
+			if (keypressed!=key) {
+								
+				keypressed.classList.remove("active");
+				keypressed.innerHTML = "";
+				keypressed = key;
+
+			}
+		}
+
+		if (!window.requestAnimationFrame)
+			window.requestAnimationFrame = window.webkitRequestAnimationFrame;
+		rafID = window.requestAnimationFrame( updatePitch );
+	}			
+  </script>
+</body>
+</html>
