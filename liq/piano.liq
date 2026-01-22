@@ -97,9 +97,9 @@ output.icecast(
         	compression=5,
         	bits_per_sample=16)
 	),
-        host="stream.p-node.org",
+        host="stream.%%%%%%.org",
         port=80,
-        password="!pianosolo!",
+        password="%%%%%%%",
         mount="/piano",
         fallible=true,
         description="Endless Stream of Piano",
@@ -115,9 +115,9 @@ output.icecast(
 # output MP3 320 > P-NODE
 
 output.icecast(%mp3(bitrate=320,samplerate=44100,stereo=true,stereo_mode="stereo",id3v2=true),
-        host = "stream.p-node.org",
+        host = "stream.%%%%%%.org",
         port = 80, 
-	password = "!pianosolo!",
+	password = "%%%%%%%%%",
         mount = "/piano.mp3", 
         description = "Endless Stream of Piano",
         name = "∏ano",
