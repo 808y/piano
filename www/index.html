@@ -50,7 +50,8 @@
 		  padding:4px 0 0 8px;
 		  line-height:2em;
 		  text-decoration:none;
-		  }
+		  text-transform: capitalize; 
+		 }
 
 		#metadata a {
 		  cursor:help;
@@ -203,24 +204,29 @@
 			  width: 15px;
 			  height: 60px;
 			  margin: 0 -7px 0 -7px;
-			  border-radius: 0 0 5px 5px;
-			  background: linear-gradient(#333, #000);
+                          border-left: 1px black solid;                                       
+                          border-right: 1 px black solid;                                       
+                          border-bottom: 1 px black solid;                                       
+			  border-top: 1px white solid;
+			  border-radius: 0 0 3px 3px;
+			  background: linear-gradient(#fff, #eee);
 		}
 		.piano-keys .black.active {
 			  box-shadow: inset -5px -10px 10px rgba(255,255,255,0.1);
 			  background:linear-gradient(to bottom, #000, #434343);
 			  font-size:0.3em;
+			  border-top:1px white solid;
 		}
 		.piano-keys .white {
 			  height: 100px;
 			  width: 30px;
-			  border-radius: 8px;
-			  border: 1px solid #000;
-			  background: linear-gradient(#fff 96%, #eee 4%);
+			  border-radius: 0 0 8px 8px;
+			  border: 1px solid #FFF;
+			  background: linear-gradient(#000 96%, #111 4%);
 		}
 		.piano-keys .white.active {
 			  box-shadow: inset -5px 5px 20px rgba(0,0,0,0.2);
-			  background:linear-gradient(to bottom, #fff 0%, #eee 100%);
+			  background:linear-gradient(to bottom, #ccc 0%, #fff 100%);
 			  font-size:0.3em;
 		}
 		.piano-keys .key span {
@@ -460,13 +466,13 @@
 				if (typeof metadata.ogg.ALBUM !== 'undefined')  
 					album = metadata.ogg.ALBUM ;
 				playingnow = artist + " – " + title + " (" + album + ") " ;
-                        	if (typeof metadata.ogg.COMPOSER !== 'undefined' && metadata.COMPOSER !== "")
+                        	if (typeof metadata.ogg.COMPOSER !== 'undefined' && metadata.ogg.COMPOSER !== "" && metadata.ogg.COMPOSER !== metadata.ogg.ARTIST)
                                 	playingnow += "| composed by " + metadata.ogg.COMPOSER + "&nbsp;";			
 				if (typeof metadata.ogg.GENRE !== 'undefined')  
 					playingnow += "| <i>" + metadata.ogg.GENRE + "</i>";
 				if (typeof metadata.ogg.DATE !== 'undefined')  
 					playingnow += " | " + metadata.ogg.DATE + "";
-				playingnow += '&nbsp;<a href="https://www.discogs.com/search/?q=' + artist.replace(/ &:/g,'+') + '+' + album.replace(/ &:/g,'+') 
+				playingnow += '&nbsp;<a href="https://www.discogs.com/search/?q=' + artist.replace(/[ &,:]/g,'+') + '+' + album.replace(/[ &,:]/g,'+') 
 					+ '" title="information about this track on discogs" target="_">'
 					+ '<span class="star">✱</span></a>';
 				document.getElementById("metadata").innerHTML = playingnow;
@@ -499,13 +505,13 @@
 			if (typeof metadata.ALBUM !== 'undefined')  
 				album = metadata.ALBUM ;
 			playingnow = artist + " – " + title + " (" + album + ") " ;
-                        if (typeof metadata.COMPOSER !== 'undefined' && metadata.COMPOSER !== "")
+                        if (typeof metadata.COMPOSER !== 'undefined' && metadata.COMPOSER !== "" && metadata.COMPOSER !== metadata.ARTIST)
                                 playingnow += "| composed by " + metadata.COMPOSER + "&nbsp;";			
 			if (typeof metadata.GENRE !== 'undefined')  
 				playingnow += "| <i>" + metadata.GENRE + "</i>";
 			if (typeof metadata.DATE !== 'undefined')  
 				playingnow += " | " + metadata.DATE + "";
-			playingnow += '&nbsp;<a href="https://www.discogs.com/search/?q=' + artist.replace(/ &:/g,'+') + '+' + album.replace(/ &:/g,'+') 
+			playingnow += '&nbsp;<a href="https://www.discogs.com/search/?q=' + artist.replace(/[ &,:]/g,'+') + '+' + album.replace(/[ &,:]/g,'+') 
 					+ '" title="information about this track on discogs" target="_">'
 					+ '<span class="star">✱</span></a>';
 			document.getElementById("metadata").innerHTML = playingnow;
